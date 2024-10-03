@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>數學線上測驗</title>
+    <script>
+        // 隨機生成兩位數
+        function getRandomTwoDigitNumber() {
+            return Math.floor(Math.random() * 90) + 10;
+        }
+
+        // 生成測驗題目
+        function generateQuiz() {
+            var num1 = getRandomTwoDigitNumber();
+            var num2 = getRandomTwoDigitNumber();
+
+            // 保證被減數比減數大
+            if (num1 < num2) {
+                var temp = num1;
+                num1 = num2;
+                num2 = temp;
+            }
+
+            // 隨機選擇減數或被減數為空格
+            var blankIndex = Math.floor(Math.random() * 2);
+
+            if (blankIndex === 0) {
+                document.getElementById("problem").innerHTML = `<input type="text" id="answer1" required> - ${num2} = ${num1 - num2}`;
+            } else {
+                document.getElementById("problem").innerHTML = `${num1} - <input type="text" id="answer2" required> = ${num1 - num2}`;
+            }
+
+            // 存儲正確答案
+            document.getElementById("correctAnswer1").value = num1;
+            document.getElementById("correctAnswer2").value = num2;
+        }
+
+        // 驗證答案
+        function checkAnswer(event) {
+            event.preventDefault(); // 防止表單提交
+
+            var correctAnswer1 = document.getElementById("correctAnswer1").value;
+            var correctAnswer2 = document.getElementById("correctAnswer2").value;
+
+            // 檢查輸入的答案是否正確
+            var userAnswer1 = document.getElementById("answer1") ? document.getElementById("answer1").value : correctAnswer1;
+            var userAnswer2 = document.getElementById("answer2") ? document.getElementById("answer2").value : correctAnswer2;
+
+            if (userAnswer1 == correctAnswer1 && userAnswer2 == correctAnswer2) {
+                alert("恭喜你，答案正確！");
+            } else {
+                alert("答案錯誤，請再試一次。");
+            }
+        }
+
+        // 頁面載入時生成測驗題目
+        window.onload = generateQuiz;
+    </script>
+</head>
+<body>
+
+<h2>數學線上測驗</h2>
+
+<form id="quizForm" onsubmit="checkAnswer(event);">
+    <label for="name">姓名:</label>
+    <input type="text" id="name" required><br><br>
+
+    <label for="seatNumber">座號:</label>
+    <input type="text" id="seatNumber" required><br><br>
+
+    <div id="problem"></div><br>
+
+    <button type="submit">提交答案</button>
+</form>
+
+<!-- 隱藏的正確答案，用來檢查學生答案 -->
+<input type="hidden" id="correctAnswer1">
+<input type="hidden" id="correctAnswer2">
+
+</body>
+</html>
