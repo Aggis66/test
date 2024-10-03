@@ -1,1 +1,126 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>線上作答</title>
+	<!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-firestore.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-storage.js"></script>
+    
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        .form-container {
+            max-width: 600px;
+            margin: auto;
+            padding: 20px;
+            border: 1px solid #ccc;
+            border-radius: 10px;
+        }
+        label {
+            display: block;
+            margin: 10px 0 5px;
+        }
+        input, textarea {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+        button {
+            padding: 10px 20px;
+            background-color: #28a745;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #218838;
+        }
+    </style>
+</head>
+<body>
+
+<div class="form-container">
+    <h2>線上作答</h2>
+    <form action="/submit" method="POST">
+        <label for="name">姓名：</label>
+        <input type="text" id="name" name="name" placeholder="請輸入您的姓名" required>
+
+        <label for="student_id">座號：</label>
+        <input type="text" id="student_id" name="student_id" placeholder="請輸入您的座號" required>
+
+        <label for="pdf">作業 PDF：</label>
+        <input type="file" id="pdf" name="pdf" accept="application/pdf" required>
+
+        <label for="answer">作答區：</label>
+        <textarea id="answer" name="answer" rows="10" placeholder="在此輸入您的答案..." required></textarea>
+
+        <button type="submit">送出作答</button>
+    </form>
+</div>
+<script>
+        // 從 Firebase 專案設定中獲取配置代碼
+        const math-5a730 = {
+            apiKey: "YOUR_API_KEY",
+            authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
+            projectId: "YOUR_PROJECT_ID",
+            storageBucket: "YOUR_PROJECT_ID.appspot.com",
+            messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
+            appId: "YOUR_APP_ID"
+        };
+
+        // 初始化 Firebase
+        const app = firebase.initializeApp(math-5a730);
+        const db = firebase.firestore();
+        const storage = firebase.storage();
+    </script>
+	</body>
+	
+<script>
+    // 監聽表單提交
+    document.getElementById('answer-form').addEventListener('submit', async (e) => {
+        e.preventDefault(); // 阻止表單提交自動刷新頁面
+
+        // 獲取表單數據
+        const name = document.getElementById('name').value;
+        const studentId = document.getElementById('student_id').value;
+        const answer = document.getElementById('answer').value;
+        const pdfFile = document.getElementById('pdf').files[0];
+
+        try {
+            // 上傳 PDF 檔案到 Firebase Storage
+            const storageRef = storage.ref();
+            const pdfRef = storageRef.child(`pdfs/${studentId}_${pdfFile.name}`);
+            await pdfRef.put(pdfFile);
+
+            // 獲取 PDF 檔案的下載 URL
+            const pdfURL = await pdfRef.getDownloadURL();
+
+            // 儲存數據到 Firestore
+            await db.collection('answers').add({
+                name: name,
+                student_id: studentId,
+                answer: answer,
+                pdf_url: pdfURL,
+                timestamp: firebase.firestore.FieldValue.serverTimestamp()
+            });
+
+            alert('提交成功！');
+
+        } catch (error) {
+            console.error('提交失敗：', error);
+            alert('提交過程中發生錯誤，請重試。');
+        }
+    });
+</script>
+
+</body>
+</html>
 
